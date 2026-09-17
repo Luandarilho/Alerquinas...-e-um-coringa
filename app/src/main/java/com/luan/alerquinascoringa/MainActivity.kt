@@ -36,48 +36,50 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            alerquinas()
+            Alerquinas()
         }
     }
 }
 
-//versao 0.2 -> adição dos botões check, back e next
+//versao 0.2.2 -> correção de logica e atualização de imagem
 @Composable
-fun alerquinas(){
-    Column(modifier = Modifier.fillMaxSize()) {
-        //declarando a lista de imagens da Harley
-        val listaHarleys = mutableListOf(R.drawable.harley01, R.drawable.harley02,R.drawable.harley03, R.drawable.harley04, R.drawable.harley05, R.drawable.harley06)
-        var harleyIndex = listaHarleys.random()
-        //variavel imagem que sera exibida na tela
-        val harley = remember { mutableIntStateOf(listaHarleys[harleyIndex])}
+fun Alerquinas(){
+    // lista com as imagens de alerquinas
+    val listaHarleys =  mutableListOf(R.drawable.harley01, R.drawable.harley02, R.drawable.harley03, R.drawable.harley04, R.drawable.harley05, R.drawable.harley06)
+    //variavel para atualizar imagem conforme index
+    val harleyIndex = remember { mutableIntStateOf(listaHarleys.indices.random() )}
+    //imagem a ser exibida
+    var harley = listaHarleys[harleyIndex.intValue]
 
-        // box superior com as duas imagens exibidas
-        Box(modifier = Modifier.fillMaxHeight(0.5f).fillMaxWidth(1f).background(Color.Red),
+
+    Column(modifier = Modifier.fillMaxSize()){
+
+        //box superior aonde as imagens sao exibidas
+        Box(modifier = Modifier.fillMaxWidth(1f).fillMaxHeight(0.5f).background(Color.Red),
             contentAlignment = Alignment.Center){
-            Row{
-                for(x in 0..1){
-                    Image(painter = painterResource(harley.intValue),
+            Row {
+                for (x in 0..1) {
+                    Image(painter = painterResource(id = harley),
                         contentDescription = null,
                         modifier = Modifier.size(150.dp).padding(20.dp).border(width = 5.dp, color = Color.Black))
                 }
             }
-
         }
 
-        //box inferior com o botao para trocar de imagem no box superior
-        Box(modifier = Modifier.fillMaxHeight(1f).fillMaxWidth(1f).background(Color.Black),
+        //box inferior aonde fica os botões de manipulação
+        Box(modifier = Modifier.fillMaxWidth(1f).fillMaxHeight(1f).background(Color.Black),
             contentAlignment = Alignment.Center){
             ConstraintLayout(modifier = Modifier.fillMaxSize()){
                 val topmarg = 80
-                val buttonmarg = 30
+                val buttonsmarg = 40
                 val check = createRef()
                 val back = createRef()
                 val next = createRef()
 
                 //botao de check
                 FloatingActionButton(onClick = {
-                    harleyIndex = listaHarleys.indices.random()
-                    harley.intValue = listaHarleys[harleyIndex]
+                    harleyIndex.intValue = listaHarleys.indices.random()
+                    harley= listaHarleys[harleyIndex.intValue]
                 },
                     containerColor = Color.Red,
                     modifier = Modifier.constrainAs(check){
@@ -87,43 +89,41 @@ fun alerquinas(){
                     }){
                     Icon(imageVector = Icons.Outlined.Check,
                         contentDescription = null)
+
                 }
 
                 //botao de back
                 FloatingActionButton(onClick = {
-                    if(harleyIndex == 0){
-                        harleyIndex = listaHarleys.size -1
-                    } else {
-                        harleyIndex -=1
-                    }
+                    harleyIndex.intValue = (harleyIndex.intValue -1 + listaHarleys.size) % listaHarleys.size
+                    harley = listaHarleys[harleyIndex.intValue]
                 },
                     containerColor = Color.Red,
                     modifier = Modifier.constrainAs(back){
                         top.linkTo(parent.top, margin = topmarg.dp)
-                        end.linkTo(check.start, margin = buttonmarg.dp)
+                        end.linkTo(check.start, margin = buttonsmarg.dp)
                     }){
                     Icon(imageVector = Icons.Outlined.ArrowBackIosNew,
                         contentDescription = null)
+
                 }
 
                 //botao de next
                 FloatingActionButton(onClick = {
-                    if(harleyIndex == listaHarleys.size -1){
-                        harleyIndex = 0
-                    } else {
-                        harleyIndex += 1
-                    }
+                    harleyIndex.intValue = (harleyIndex.intValue +1) % listaHarleys.size
+                    harley = listaHarleys[harleyIndex.intValue]
                 },
                     containerColor = Color.Red,
                     modifier = Modifier.constrainAs(next){
                         top.linkTo(parent.top, margin = topmarg.dp)
-                        start.linkTo(check.end, margin = buttonmarg.dp)
+                        start.linkTo(check.end, margin = buttonsmarg.dp)
                     }){
                     Icon(imageVector = Icons.Outlined.ArrowForwardIos,
                         contentDescription = null)
+
                 }
 
             }
+
         }
     }
 }
